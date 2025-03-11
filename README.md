@@ -1,2 +1,2 @@
 # household-services
-This is a app for mad2 project.
+This is a my app for mad2 project.
