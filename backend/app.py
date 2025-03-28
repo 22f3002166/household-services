@@ -1,6 +1,7 @@
 from flask import Flask
 from database import db
 from models import User, Role, UserRole, Services, ServiceRequest, Review
+from resources import *
 from config import *
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import hash_password
@@ -11,6 +12,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
+    from resources import api
+    api.init_app(app)
     
     datastore = SQLAlchemyUserDatastore(db, User, Role)
     app.security = Security(app, datastore)

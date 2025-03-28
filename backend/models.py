@@ -35,14 +35,15 @@ class UserRole(db.Model):
 class Services(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
-    base_price = db.Column(db.String, nullable=False)
+    base_price = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 class ServiceRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    service_provider_id = db.Column(db.Integer)
+    service_provider_id = db.Column(db.Integer, nullable=True)
     date_of_register = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
     date_of_completion = db.Column(db.DateTime)
     service_status = db.Column(db.String, default="Pending")
