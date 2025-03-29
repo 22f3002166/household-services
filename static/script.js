@@ -4,6 +4,7 @@ import Register from './components/Register.js';
 import Registersp from './components/Registersp.js';
 import Navbar from './components/Navbar.js';
 import Footer from './components/Footer.js';
+import admin from './components/admin.js';
 
 const routes = [
     {path: '/', component: Home},
@@ -11,7 +12,8 @@ const routes = [
     {path: '/register', component: Register},
     {path: '/registersp', component: Registersp},
     {path: '/navbar', component: Navbar},
-    {path: '/foot', component: Footer}
+    {path: '/foot', component: Footer},
+    {path: '/admin', component: admin}
 
 ]
 const router = new VueRouter({

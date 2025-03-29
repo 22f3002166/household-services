@@ -83,13 +83,13 @@ class ServiceApi(Resource):
     @auth_required('token')
     @roles_accepted("admin")
     def delete(self, service_id):
-        args = parser.parse_args()
+        # args = parser.parse_args()
         service = Services.query.get(service_id)
         db.session.delete(service)
         db.session.commit()
         return{
             "message": "deleted",
-            "name": args["name"]
+            # "name": args["name"]
         }
             
 
