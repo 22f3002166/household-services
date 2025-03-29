@@ -100,7 +100,7 @@ export default {
                             <button @click="deleteService(service.id)" class="btn btn-danger">
                                 ❌ Delete
                             </button>
-                        </div>
+                        </div> 
                     </div>
                 </div>
             </div>
