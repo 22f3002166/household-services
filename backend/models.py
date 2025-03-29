@@ -1,6 +1,6 @@
 from flask_security import UserMixin, RoleMixin
 from datetime import datetime
-from database import db
+from .database import db
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,6 +33,7 @@ class UserRole(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
 
 class Services(db.Model):
+    __tablename__ = "services"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
     base_price = db.Column(db.Integer, nullable=False)
@@ -40,6 +41,7 @@ class Services(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 class ServiceRequest(db.Model):
+    __tablename__ = "service_request"
     id = db.Column(db.Integer, primary_key=True)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

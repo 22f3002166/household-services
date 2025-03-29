@@ -1,8 +1,8 @@
 from flask import Flask
-from database import db
-from models import User, Role, UserRole, Services, ServiceRequest, Review
-from resources import *
-from config import *
+from backend.database import db
+from backend.models import User, Role, UserRole, Services, ServiceRequest, Review
+from backend.resources import *
+from backend.config import *
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import hash_password
 
@@ -12,7 +12,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
-    from resources import api
+    from backend.resources import api
     api.init_app(app)
     
     datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -40,7 +40,7 @@ with app.app_context():
         app.security.datastore.create_user( email = "user@sp.com", name = "Service_Professional", password = hash_password("1234"), roles = ['service_professional'])
     
     db.session.commit()
-from routes import *
+from backend.routes import *
 
 if __name__ == "__main__":
     app.run()
