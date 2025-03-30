@@ -53,7 +53,7 @@ export default {
                 const response = await fetch(`/api/search_services?query=${encodeURIComponent(this.searchQuery)}`);
                 const data = await response.json();
                 this.services = data.services;
-                console.log(this.services); // Check if services are fetched correctly
+                console.log(this.services); 
             } catch (error) {
                 console.error("Error fetching services:", error);
             }
@@ -87,7 +87,7 @@ export default {
                 
                 if (response.ok) {
                     alert("Service request created successfully!");
-                    this.fetchServices(); // Optionally refresh the services list
+                    this.fetchServices(); 
                 } else {
                     alert("Failed to create service request: " + result.message);
                 }

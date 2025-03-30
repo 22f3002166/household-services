@@ -245,7 +245,7 @@ export default {
 
     try {
         const response = await fetch(`/api/admin/users/${user.id}/toggle`, {
-            method: "PATCH",  // Use PATCH (not PUT) to toggle status
+            method: "PATCH", 
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": token
@@ -254,7 +254,7 @@ export default {
 
         const data = await response.json();
         if (response.ok) {
-            user.active = data.active;  // Update status dynamically
+            user.active = data.active; 
         } else {
             alert(`Error: ${data.error || "Failed to update user status"}`);
         }

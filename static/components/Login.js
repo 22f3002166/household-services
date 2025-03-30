@@ -43,13 +43,13 @@ export default {
             .then(response => response.json())
             .then(data => { 
                 console.log(data);
-                if (data.user && data.user["auth-token"]) {  // Corrected this line
+                if (data.user && data.user["auth-token"]) {  
                     localStorage.setItem("auth_token", data.user["auth-token"]); 
                     localStorage.setItem("id", data.user.id);
                     localStorage.setItem("username", data.user.name);
                     this.$emit('login');
     
-                    // Route user based on role
+                  
                     if (data.user.role === 'admin') {
                         this.$router.push('/admin');
                     } else if (data.user.role === 'customer') {

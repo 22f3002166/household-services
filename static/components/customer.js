@@ -1,10 +1,10 @@
 export default {
     data() {
         return {
-            username: "", // Customer name
-            availableServices: [], // List of services
-            inProgressRequests: [], // List of in-progress requests
-            completedRequests: [], // List of completed requests
+            username: "", 
+            availableServices: [], 
+            inProgressRequests: [], 
+            completedRequests: [], 
             message: ""
         };
     },
@@ -16,7 +16,7 @@ export default {
                 return;
             }
             try {
-                // Fetch customer name
+           
                 const userResponse = await fetch('/api/customer', {
                     method: 'GET',
                     headers: {
@@ -31,7 +31,7 @@ export default {
                     this.message = "Failed to fetch user data.";
                 }
 
-                // Fetch available services
+             
                 const servicesResponse = await fetch('/api/customer/service', {
                     method: 'GET',
                     headers: {
@@ -46,7 +46,7 @@ export default {
                     this.message = "Failed to fetch services.";
                 }
 
-                // Fetch in-progress requests
+        
                 const progressResponse = await fetch('/api/customer/in_progress_requests', {
                     method: 'GET',
                     headers: {
@@ -61,7 +61,6 @@ export default {
                     this.message = "Failed to fetch in-progress requests.";
                 }
 
-                // Fetch completed requests
                 const completedResponse = await fetch('/api/customer/completed_requests', {
                     method: 'GET',
                     headers: {
@@ -71,7 +70,7 @@ export default {
                 });
                 const completedData = await completedResponse.json();
                 if (completedResponse.ok) {
-                    this.completedRequests = completedData.completed_requests;  // Make sure the key matches the API response
+                    this.completedRequests = completedData.completed_requests;  
                 } else {
                     this.message = completedData.message || "Failed to fetch completed requests.";
                 }

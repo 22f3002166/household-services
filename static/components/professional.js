@@ -1,8 +1,8 @@
 export default {
     data() {
         return {
-            username: "", // Professional's name
-            serviceRequests: [], // Service requests array
+            username: "", 
+            serviceRequests: [], 
             message: ""
         };
     },

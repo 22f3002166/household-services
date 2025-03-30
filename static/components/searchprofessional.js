@@ -32,7 +32,7 @@ export default {
     data() {
         return {
             searchQuery: "",
-            users: []  // Changed 'Users' to 'users'
+            users: []  
         };
     },
 
@@ -46,7 +46,7 @@ export default {
             try {
                 const response = await fetch(`/api/search_professional?query=${encodeURIComponent(this.searchQuery)}`);
                 const data = await response.json();
-                console.log(data); // Debugging step
+                console.log(data);
 
                 if (data.users) {
                     this.users = data.users;

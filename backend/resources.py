@@ -23,7 +23,7 @@ class ServiceApi(Resource):
     @roles_accepted("admin", "customer", "service_professional")
     def get(self, service_id=None):
         if service_id is not None:
-            # Fetch a specific service by ID
+       
             service = Services.query.get(service_id)
             if service:
                 return jsonify({
@@ -34,7 +34,6 @@ class ServiceApi(Resource):
                 })
             return jsonify({"message": "Service not found"}), 404
 
-        # Fetch all services
         services = []
         service_json = []
         
@@ -98,13 +97,12 @@ class ServiceApi(Resource):
     @auth_required('token')
     @roles_accepted("admin")
     def delete(self, service_id):
-        # args = parser.parse_args()
+     
         service = Services.query.get(service_id)
         db.session.delete(service)
         db.session.commit()
         return{
-            "message": "deleted",
-            # "name": args["name"]
+            "message": "deleted"
         }
             
 

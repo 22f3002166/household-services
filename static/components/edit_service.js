@@ -13,7 +13,7 @@ export default {
     methods: {
         async fetchService() {
             const token = localStorage.getItem("auth_token");
-            const serviceId = this.$route.params.id; // Assuming the service ID is passed as a route parameter
+            const serviceId = this.$route.params.id;
 
             if (!token) {
                 this.message = "Unauthorized! Please log in.";
@@ -31,7 +31,7 @@ export default {
 
                 const data = await response.json();
                 if (response.ok) {
-                    this.service = data; // Assuming the API returns the service object directly
+                    this.service = data; 
                 } else {
                     this.message = data.message || "Failed to fetch service.";
                 }
@@ -71,7 +71,7 @@ export default {
         }
     },
     mounted() {
-        this.fetchService(); // Fetch the service details when the component is mounted
+        this.fetchService(); 
     },
     template: `
         <div class="container mt-4">

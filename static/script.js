@@ -35,7 +35,7 @@ const router = new VueRouter({
 })
 const app = new Vue({
   el: "#app",
-  router, // router: router
+  router, 
   template: `
   <div class="container">
       <nav-bar :loggedIn = 'loggedIn' @logout="handleLogout"></nav-bar>

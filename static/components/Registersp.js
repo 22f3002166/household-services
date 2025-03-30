@@ -49,7 +49,7 @@ export default {
                 email: "",
                 password: "",
                 service_provider_experience: "",
-                service_name: ""  // Now stores service name instead of ID
+                service_name: "" 
             },
             services: [],
             message: "",

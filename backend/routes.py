@@ -73,12 +73,12 @@ def register_service_professional():
     if app.security.datastore.find_user(email=credentials['email']):
         return jsonify({"message": "User already exists"}), 409  
 
-    # Ensure the service exists and is unassigned
+
     selected_service = Services.query.filter_by(name=credentials.get('service_name'), user_id=None).first()
     if not selected_service:
         return jsonify({"message": "Invalid or already assigned service"}), 400
 
-    # Create new service professional
+
     new_user = app.security.datastore.create_user(
         email=credentials['email'],
         name=credentials['name'],
@@ -88,9 +88,9 @@ def register_service_professional():
         service_name=credentials.get('service_name')
     )
 
-    db.session.flush()  # Ensures new_user.id is available before commit
+    db.session.flush() 
 
-    # Assign the service to the professional
+ 
     selected_service.user_id = new_user.id
 
     app.security.datastore.add_role_to_user(new_user, role)
@@ -200,7 +200,7 @@ def update_service_professional():
 @roles_required('customer')
 def create_service_request():
     data = request.get_json()
-    print("Received data:", data)  # Debugging log
+    print("Received data:", data)  
 
     user_id = current_user.id
     service_id = data.get('service_id')
@@ -209,21 +209,21 @@ def create_service_request():
     if not user_id or not service_id or not service_provider_id:
         return jsonify({'message': 'Missing required fields', 'received_data': data}), 400
 
-    # Check if the service exists
+
     service = Services.query.get(service_id)
     if not service:
         return jsonify({'message': 'Invalid service_id'}), 400
 
-    # Validate the service provider
+
     if service.user_id != service_provider_id:
         return jsonify({'message': 'Invalid service provider for this service'}), 400
 
-    # Check if a request already exists for this user and service
+ 
     existing_request = ServiceRequest.query.filter_by(user_id=user_id, service_id=service_id).first()
     if existing_request:
         return jsonify({'message': 'You have already requested this service'}), 400
 
-    # Create new service request
+  
     new_request = ServiceRequest(
         user_id=user_id,
         service_id=service_id,
@@ -297,7 +297,7 @@ def get_service_requests():
 
         result = []
         for request in service_requests:
-            user = User.query.get(request.user_id)  # Fetch user details (customer)
+            user = User.query.get(request.user_id) 
             provider = User.query.get(request.service_provider_id) 
             result.append({
                 'id': request.id,
@@ -626,7 +626,7 @@ def get_all_reviews():
         for review in reviews:
             service_name = "Unknown" 
 
-            # Fetch the service request to get the service ID
+            
             service_request = ServiceRequest.query.get(review.service_request_id)
 
             if service_request and service_request.service_id:
@@ -634,15 +634,15 @@ def get_all_reviews():
                 if service:
                     service_name = service.name 
 
-            # Fetch customer and service provider names
+           
             customer = User.query.get(review.customer_id)
             service_provider = User.query.get(review.service_provider_id)
 
             review_data.append({
                 'customer_id': review.customer_id,
-                'customer_name': customer.name if customer else "Unknown",  # Get customer name
+                'customer_name': customer.name if customer else "Unknown",  
                 'service_provider_id': review.service_provider_id,
-                'service_provider_name': service_provider.name if service_provider else "Unknown",  # Get service provider name
+                'service_provider_name': service_provider.name if service_provider else "Unknown",  
                 'service_name': service_name,
                 'rating': review.rating,
                 'review_description': review.review_description
@@ -685,7 +685,7 @@ def get_all_service_professionals():
 @auth_required('token')
 @roles_required('admin')
 def get_all_users():
-    users = User.query.all()  # Fetch all users
+    users = User.query.all() 
 
     user_list = []
     for user in users:
@@ -694,14 +694,14 @@ def get_all_users():
         elif any(role.name == "service_professional" for role in user.roles):
             role = "service_professional"
         else:
-            continue  # Skip users with other roles (like admin)
+            continue  
 
         user_list.append({
             "id": user.id,
             "name": user.name,
             "email": user.email,
             "role": role,
-            "active": user.active  # Ensure `is_active` exists in your User model
+            "active": user.active  
         })
 
     return jsonify({"users": user_list}), 200
@@ -716,11 +716,11 @@ def toggle_user_status(user_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Prevent blocking/unblocking admin users
+    
     if any(role.name == "admin" for role in user.roles):
         return jsonify({"error": "Cannot modify admin users"}), 403
 
-    # Toggle is_active status
+    
     user.active = not user.active
     db.session.commit()
 
@@ -731,18 +731,17 @@ def toggle_user_status(user_id):
 @roles_required('customer')
 def get_services_customer():
     try:
-        services = Services.query.all()  # Fetch all services
-        
+        services = Services.query.all() 
         if not services:
             return jsonify({'message': 'No services found'}), 404
 
         result = []
         for service in services:
             if service.user_id is None:  
-                continue  # Skip this entry if user_id is None
+                continue  
             
             user = User.query.get(service.user_id)
-            if not user:  # Ensure the user exists
+            if not user:  
                 continue
 
             result.append({
@@ -751,7 +750,7 @@ def get_services_customer():
                 'base_price': service.base_price,
                 'description': service.description,
                 'user_name': user.name,
-                'service_provider_id': user.id  # Ensure correct provider ID
+                'service_provider_id': user.id  
             })
 
         if not result:
@@ -846,7 +845,7 @@ def search_services():
 
     services = Services.query.filter(Services.name.ilike(f"%{query}%")).all()
 
-    # Extract only serializable attributes
+   
     services_list = []
     for s in services:
         if s.user_id is None:  
@@ -870,7 +869,6 @@ def search_professional():
 
     users = User.query.filter(User.name.ilike(f"%{query}%")).all()
 
-    # Extract only serializable attributes
     users_list = []
     for s in users:
         if s.id is None:  

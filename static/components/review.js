@@ -14,7 +14,7 @@ export default {
             }
 
             try {
-                const token = localStorage.getItem("auth_token"); // Get token for authentication
+                const token = localStorage.getItem("auth_token"); 
 
                 if (!token) {
                     this.message = "Unauthorized! Please log in.";
