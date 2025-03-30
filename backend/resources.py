@@ -1,10 +1,13 @@
 from flask_restful import Api, Resource, reqparse
 from .models import *
 from datetime import datetime
-from flask import jsonify, request
+from flask import jsonify, request , current_app as app
 from flask_security import auth_required, roles_required, current_user, hash_password, roles_accepted
 
+
 api = Api()
+
+# cache = app.cache
 
 def roles_list(roles):
     role_list = []
@@ -21,6 +24,7 @@ parser.add_argument("description")
 class ServiceApi(Resource):
     @auth_required('token')
     @roles_accepted("admin", "customer", "service_professional")
+    # @cache.cached(timeout=5)
     def get(self, service_id=None):
         if service_id is not None:
        

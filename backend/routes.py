@@ -5,11 +5,39 @@ from .database import db
 from datetime import datetime
 from flask_security import auth_required, roles_required, current_user, hash_password , roles_accepted, login_user
 from flask_security.utils import verify_password
+from .celery.tasks import add, create_csv
+from celery.result import AsyncResult
+
+
+
+cache = app.cache
 
 
 @app.route('/', methods=['GET'])
 def home():
     return render_template('index.html')
+
+
+@app.route('/cache', methods=['GET'])
+@cache.cached(timeout=5)
+def cache():
+    return {'time': datetime.utcnow()}
+
+@app.route('/celery', methods=['GET'])
+def celery():
+    result = add.delay(1, 2)
+    return jsonify({'task_id': result.id})
+
+@app.route('/createcsv', methods=['GET'])
+def createcsv():
+    task = create_csv.delay()
+    return jsonify({'task_id': task.id})
+
+@app.route('/celerydata/<id>', methods=['GET'])
+def celerydata(id):
+    result = add.AsyncResult(id)
+    return jsonify({'status': result.status, 'result': result.result})
+
 
 
 
