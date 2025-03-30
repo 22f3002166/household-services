@@ -21,16 +21,30 @@ parser.add_argument("description")
 class ServiceApi(Resource):
     @auth_required('token')
     @roles_accepted("admin", "customer", "service_professional")
-    def get(self):
+    def get(self, service_id=None):
+        if service_id is not None:
+            # Fetch a specific service by ID
+            service = Services.query.get(service_id)
+            if service:
+                return jsonify({
+                    "id": service.id,
+                    "name": service.name,
+                    "base_price": service.base_price,
+                    "description": service.description
+                })
+            return jsonify({"message": "Service not found"}), 404
+
+        # Fetch all services
         services = []
         service_json = []
         
         if "admin" in roles_list(current_user.roles):
             services = Services.query.all()
         elif "service_professional" in roles_list(current_user.roles):
-            services = Services.query.filter_by(user_id = current_user.id).all()
+            services = Services.query.filter_by(user_id=current_user.id).all()
         elif "customer" in roles_list(current_user.roles):
             services = Services.query.all()
+        
         for service in services:
             service_json.append({
                 "id": service.id,
@@ -38,6 +52,7 @@ class ServiceApi(Resource):
                 "base_price": service.base_price,
                 "description": service.description
             })
+        
         if service_json:
             return jsonify(service_json)
         return jsonify({"message": "No services found"})
@@ -93,4 +108,4 @@ class ServiceApi(Resource):
         }
             
 
-api.add_resource(ServiceApi, '/api/service_get', '/api/service_create', '/api/service_update/<int:service_id>', '/api/service_delete/<int:service_id>')
+api.add_resource(ServiceApi, '/api/service_get','/api/service_get/<int:service_id>', '/api/service_create', '/api/service_update/<int:service_id>', '/api/service_delete/<int:service_id>')

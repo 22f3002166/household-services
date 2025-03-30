@@ -7,6 +7,8 @@ import Footer from './components/Footer.js';
 import admin from './components/admin.js';
 import customer from './components/customer.js';
 import professional from './components/professional.js';
+import create_service from './components/create_service.js';
+import edit_service from './components/edit_service.js';
 
 const routes = [
     {path: '/', component: Home},
@@ -17,7 +19,9 @@ const routes = [
     {path: '/foot', component: Footer},
     {path: '/admin', component: admin},
     {path: '/customer', component: customer},
-    {path: '/professional', component: professional}
+    {path: '/professional', component: professional},
+    {path: '/create_service', component: create_service},
+    {path: '/edit_service/:id', component: edit_service}
 
 ]
 const router = new VueRouter({
