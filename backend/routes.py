@@ -838,3 +838,48 @@ def get_comp_requests():
     except Exception as e:
         return jsonify({'message': 'Error retrieving in-progress requests', 'error': str(e)}), 500
 
+@app.route('/api/search_services', methods=['GET'])
+def search_services():
+    query = request.args.get("query", "")
+    if not query:
+        return jsonify({"message": "No query provided"}), 400
+
+    services = Services.query.filter(Services.name.ilike(f"%{query}%")).all()
+
+    # Extract only serializable attributes
+    services_list = []
+    for s in services:
+        if s.user_id is None:  
+                continue
+        services_list.append({
+                "id": s.id,
+                "name": s.name,
+                "description": s.description,
+                "base_price": s.base_price,
+                "user_name": User.query.get(s.user_id).name if s.user_id else None
+            })
+
+    return jsonify({"services": services_list})
+
+
+@app.route('/api/search_professional', methods=['GET'])
+def search_professional():
+    query = request.args.get("query", "")
+    if not query:
+        return jsonify({"message": "No query provided"}), 400
+
+    users = User.query.filter(User.name.ilike(f"%{query}%")).all()
+
+    # Extract only serializable attributes
+    users_list = []
+    for s in users:
+        if s.id is None:  
+                continue
+        users_list.append({
+                "id": s.id,
+                "name": s.name,
+                "email": s.email,
+            })
+
+    return jsonify({"users": users_list})
+

@@ -10,6 +10,8 @@ import professional from './components/professional.js';
 import create_service from './components/create_service.js';
 import edit_service from './components/edit_service.js';
 import review from './components/review.js';
+import searchservice from './components/searchservice.js';
+import searchprofessional from './components/searchprofessional.js';
 
 const routes = [
     {path: '/', component: Home},
@@ -23,30 +25,37 @@ const routes = [
     {path: '/professional', component: professional},
     {path: '/create_service', component: create_service},
     {path: '/edit_service/:id', component: edit_service},
-    {path: '/review/:id', component: review}
+    {path: '/review/:id', component: review},
+    {path: '/searchservice', component: searchservice},
+    {path: '/searchprofessional', component: searchprofessional}
 
 ]
 const router = new VueRouter({
     routes 
 })
 const app = new Vue({
-  el: '#app',
-  router,
+  el: "#app",
+  router, // router: router
   template: `
-    <div class="container">
-        <nav-bar></nav-bar>
-        <router-view></router-view>
-        <foot></foot>
-    </div>
+  <div class="container">
+      <nav-bar :loggedIn = 'loggedIn' @logout="handleLogout"></nav-bar>
+      <router-view :loggedIn = 'loggedIn' @login="handleLogin"></router-view>
+      <foot></foot>
+  </div>
   `,
   data: {
-    section: "frontend"
+      loggedIn: false
   },
-  components: {
-    "nav-bar": Navbar,
-    "foot": Footer
+  components:{
+      "nav-bar": Navbar,
+      "foot": Footer
+  },
+  methods:{
+      handleLogout(){
+          this.loggedIn = false
+      },
+      handleLogin(){
+          this.loggedIn = true
+      }
   }
-
-
-});
-
+}) 

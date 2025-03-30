@@ -358,6 +358,9 @@ mounted() {
                 <div class="container mt-4">
                     <!-- Manage Users -->
                     <h2>Manage Users</h2>
+                    <router-link to="/searchprofessional" class="btn btn-success">
+                        Search Professional
+                    </router-link>
                     <div v-if="userMessage" class="alert alert-warning text-center mt-3">
                     {{ userMessage }}
                     </div>

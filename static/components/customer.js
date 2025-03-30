@@ -156,7 +156,12 @@ export default {
         <div v-else class="text-center">
             <h2>Welcome, {{ username }}!</h2>
             
-            <h3>All Available Services</h3>
+            <div class="d-flex justify-content-between align-items-center">
+                    <h2>All Services</h2>
+                    <router-link to="/searchservice" class="btn btn-success">
+                        Search Service
+                    </router-link>
+            </div>
             <table class="table table-bordered">
                 <thead>
                     <tr>
