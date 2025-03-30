@@ -200,30 +200,45 @@ def update_service_professional():
 @roles_required('customer')
 def create_service_request():
     data = request.get_json()
+    print("Received data:", data)  # Debugging log
+
     user_id = current_user.id
     service_id = data.get('service_id')
     service_provider_id = data.get('service_provider_id')
-    
+
     if not user_id or not service_id or not service_provider_id:
-        return jsonify({'message': 'Missing required fields'}), 400
-    
+        return jsonify({'message': 'Missing required fields', 'received_data': data}), 400
+
+    # Check if the service exists
     service = Services.query.get(service_id)
     if not service:
         return jsonify({'message': 'Invalid service_id'}), 400
 
+    # Validate the service provider
+    if service.user_id != service_provider_id:
+        return jsonify({'message': 'Invalid service provider for this service'}), 400
+
+    # Check if a request already exists for this user and service
+    existing_request = ServiceRequest.query.filter_by(user_id=user_id, service_id=service_id).first()
+    if existing_request:
+        return jsonify({'message': 'You have already requested this service'}), 400
+
+    # Create new service request
     new_request = ServiceRequest(
         user_id=user_id,
         service_id=service_id,
         service_provider_id=service_provider_id,
-        service_status='requested'
+        service_status='pending'
     )
     db.session.add(new_request)
+    
     try:
         db.session.commit()
         return jsonify({'message': 'Service request created successfully'}), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': 'Service request failed', "service_id": service_id ,'error': str(e)}), 500
+        return jsonify({'message': 'Service request failed', 'error': str(e)}), 500
+
     
 
     
@@ -282,11 +297,13 @@ def get_service_requests():
 
         result = []
         for request in service_requests:
+            user = User.query.get(request.user_id)  # Fetch user details (customer)
+            provider = User.query.get(request.service_provider_id) 
             result.append({
                 'id': request.id,
                 'service_id': request.service_id,
-                'user_id': request.user_id,
-                'service_provider_id': request.service_provider_id,
+                'user_email': user.email,
+                'service_provider_email': provider.email,
                 'service_status': request.service_status,
                 'date_of_register': request.date_of_register,
                 'date_of_completion': request.date_of_completion,
@@ -456,8 +473,8 @@ def accept_service_request(request_id):
     if not service_request:
         return jsonify({'message': 'Service request not found'}), 404
 
-    if service_request.service_status != 'Pending':
-        return jsonify({'message': 'Service request is not available for acceptance'}), 400
+    # if service_request.service_status != 'pending':
+    #     return jsonify({'message': 'Service request is not available for acceptance'}), 400
 
     user = current_user
 
@@ -478,8 +495,8 @@ def reject_service_request(request_id):
     if not service_request:
         return jsonify({'message': 'Service request not found'}), 404
 
-    if service_request.service_status != 'Pending':
-        return jsonify({'message': 'Service request is not available for rejection'}), 400
+    # if service_request.service_status != 'pending':
+    #     return jsonify({'message': 'Service request is not available for rejection'}), 400
 
     service_request.service_status = 'rejected'
 
@@ -500,6 +517,7 @@ def complete_service_request(request_id):
         return jsonify({'message': 'Service request is not available for completion'}), 400
 
     service_request.service_status = 'completed'
+    service_request.date_of_completion = datetime.utcnow()
 
     db.session.commit()
 
@@ -705,4 +723,85 @@ def toggle_user_status(user_id):
     db.session.commit()
 
     return jsonify({"message": "User status updated", "active": user.active}), 200
+
+@app.route('/api/customer/service', methods=['GET'])
+@auth_required('token')
+@roles_required('customer')
+def get_services_customer():
+    try:
+        services = Services.query.all()  # Fetch all services
+        
+        if not services:
+            return jsonify({'message': 'No services found'}), 404
+
+        result = []
+        for service in services:
+            if service.user_id is None:  
+                continue  # Skip this entry if user_id is None
+            
+            user = User.query.get(service.user_id)
+            if not user:  # Ensure the user exists
+                continue
+
+            result.append({
+                'id': service.id,
+                'name': service.name,
+                'base_price': service.base_price,
+                'description': service.description,
+                'user_name': user.name,
+                'service_provider_id': user.id  # Ensure correct provider ID
+            })
+
+        if not result:
+            return jsonify({'message': 'No valid service requests found'}), 404
+
+        return jsonify({'service_requests': result}), 200
+
+    except Exception as e:
+        return jsonify({'message': 'Failed to fetch services', 'error': str(e)}), 500
+    
+    
+@app.route('/api/customer/in_progress_requests', methods=['GET'])
+@auth_required('token')
+@roles_accepted('customer')
+def get_in_progress_requests():
+    try:
+        service_requests = ServiceRequest.query.filter_by(user_id=current_user.id, service_status='in progress').all()
+
+        result = []
+        for request in service_requests:
+            provider = User.query.get(request.service_provider_id)  
+
+            result.append({
+                'id': request.id,
+                'service_id': request.service_id,
+                'service_name': Services.query.get(request.service_id).name,
+                'service_provider_email': provider.email if provider else None,
+                'service_status': request.service_status,
+                'date_of_register': request.date_of_register
+            })
+        
+        return jsonify({'in_progress_requests': result}), 200
+
+    except Exception as e:
+        return jsonify({'message': 'Error retrieving in-progress requests', 'error': str(e)}), 500
+    
+@app.route('/api/customer/complete_service_request/<int:request_id>', methods=['PUT'])
+@auth_required('token')
+@roles_required('customer')
+def complete_service_cust_request(request_id):
+    service_request = ServiceRequest.query.get(request_id)
+
+    if not service_request:
+        return jsonify({'message': 'Service request not found'}), 404
+
+    if service_request.service_status != 'in progress':
+        return jsonify({'message': 'Service request is not available for completion'}), 400
+
+    service_request.service_status = 'completed'
+    service_request.date_of_completion = datetime.utcnow()
+
+    db.session.commit()
+
+    return jsonify({'message': 'Service request completed successfully'}), 200
 
