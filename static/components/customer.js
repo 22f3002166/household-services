@@ -4,6 +4,7 @@ export default {
             username: "", // Customer name
             availableServices: [], // List of services
             inProgressRequests: [], // List of in-progress requests
+            completedRequests: [], // List of completed requests
             message: ""
         };
     },
@@ -30,7 +31,7 @@ export default {
                     this.message = "Failed to fetch user data.";
                 }
 
-                // Fetch available services for the customer
+                // Fetch available services
                 const servicesResponse = await fetch('/api/customer/service', {
                     method: 'GET',
                     headers: {
@@ -45,7 +46,7 @@ export default {
                     this.message = "Failed to fetch services.";
                 }
 
-                // Fetch in-progress service requests
+                // Fetch in-progress requests
                 const progressResponse = await fetch('/api/customer/in_progress_requests', {
                     method: 'GET',
                     headers: {
@@ -54,16 +55,55 @@ export default {
                     }
                 });
                 const progressData = await progressResponse.json();
-                console.log("In-progress requests:", progressData);
-
                 if (progressResponse.ok) {
-                    this.inProgressRequests = progressData.in_progress_requests; // Update this line
+                    this.inProgressRequests = progressData.in_progress_requests;
                 } else {
-                    this.message = progressData.message || "Failed to fetch in-progress requests.";
-}
+                    this.message = "Failed to fetch in-progress requests.";
+                }
+
+                // Fetch completed requests
+                const completedResponse = await fetch('/api/customer/completed_requests', {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    }
+                });
+                const completedData = await completedResponse.json();
+                if (completedResponse.ok) {
+                    this.completedRequests = completedData.completed_requests;  // Make sure the key matches the API response
+                } else {
+                    this.message = completedData.message || "Failed to fetch completed requests.";
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
                 this.message = "Error fetching data.";
+            }
+        },
+        async completeServiceRequest(requestId) {
+            const token = localStorage.getItem("auth_token");
+            if (!token) {
+                this.message = "Unauthorized! Please log in.";
+                return;
+            }
+            try {
+                const response = await fetch(`/api/customer/complete_service_request/${requestId}`, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    }
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Service request completed successfully!");
+                    this.fetchCustomerData();
+                } else {
+                    alert("Failed to complete service request: " + result.message);
+                }
+            } catch (error) {
+                console.error("Error completing service request:", error);
+                alert("Error completing service request.");
             }
         },
         async requestService(serviceId, serviceProviderId) {
@@ -103,33 +143,6 @@ export default {
                 console.error("Error requesting service:", error);
                 alert("Error requesting service.");
             }
-        },
-        async completeServiceRequest(requestId) {
-            const token = localStorage.getItem("auth_token");
-            if (!token) {
-                this.message = "Unauthorized! Please log in.";
-                return;
-            }
-            try {
-                // Use requestId instead of request.id
-                const response = await fetch(`/api/customer/complete_service_request/${requestId}`, {
-                    method: 'PUT',
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": token
-                    }
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    alert("Service request completed successfully!");
-                    this.fetchCustomerData(); // Refresh the data
-                } else {
-                    alert("Failed to complete service request: " + result.message);
-                }
-            } catch (error) {
-                console.error("Error completing service request:", error);
-                alert("Error completing service request.");
-            }
         }
     },
     mounted() {
@@ -142,6 +155,7 @@ export default {
         </div>
         <div v-else class="text-center">
             <h2>Welcome, {{ username }}!</h2>
+            
             <h3>All Available Services</h3>
             <table class="table table-bordered">
                 <thead>
@@ -190,8 +204,37 @@ export default {
                             <button class="btn btn-success" @click="completeServiceRequest(request.id)">Complete</button>
                         </td>
                     </tr>
-                    <tr v-if="inProgressRequests.length === -1">
+                    <tr v-if="inProgressRequests.length === 0">
                         <td colspan="5" class="text-center">No in-progress requests.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 class="mt-4">Completed Requests</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        <th>Service Provider</th>
+                        <th>Status</th>
+                        <th>Completion Date</th>
+                        <th>Action</th> <!-- Add this header -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="request in completedRequests" :key="request.id">
+                        <td>{{ request.service_name }}</td>
+                        <td>{{ request.service_provider_email }}</td>
+                        <td>{{ request.service_status }}</td>
+                        <td>{{ request.date_of_completion }}</td>
+                        <td>
+                            <router-link :to="'/review/' + request.id" class="btn btn-warning">
+                                review
+                            </router-link>
+                        </td>
+                    </tr>
+                    <tr v-if="completedRequests.length === 0">
+                        <td colspan="5" class="text-center">No completed requests.</td>
                     </tr>
                 </tbody>
             </table>

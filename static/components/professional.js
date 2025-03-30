@@ -67,10 +67,43 @@ export default {
             } catch (error) {
                 console.error("Error updating status:", error);
             }
-        }        
+        },        
+    
+        async fetchReviews() {
+            const token = localStorage.getItem("auth_token");
+        
+            if (!token) {
+                this.reviewMessage = "Unauthorized! Please log in.";
+                return;
+            }
+        
+            try {
+                const response = await fetch('/api/service_professional/reviews', {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    }
+                });
+        
+                const data = await response.json();
+                console.log(data);
+                if (response.ok) {
+                    this.reviews = data.reviews || [];
+                    this.reviewMessage = this.reviews.length ? "" : "No reviews found.";
+                } else {
+                    this.reviewMessage = data.message || "Failed to fetch reviews.";
+                }
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+                this.reviewMessage = "Error fetching reviews.";
+            }
+        }
     },
+    
     mounted() {
         this.fetchCustomerData();
+        this.fetchReviews();
     },
     template: `
     <div class="container mt-4">
@@ -110,6 +143,33 @@ export default {
                     </tr>
                 </tbody>
             </table>
+            <div class="container mt-4">
+                    <h2>All Reviews</h2>
+                    <div v-if="reviewMessage" class="alert alert-warning text-center mt-3">
+                        {{ reviewMessage }}
+                    </div>
+
+                    <div v-else class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Service Name</th>
+                                    <th>Rating</th>
+                                    <th>Review Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="review in reviews" :key="review.id">
+                                    <td>{{ review.customer_name }}</td>
+                                    <td>{{ review.service_name }}</td>
+                                    <td>{{ review.rating }}</td>
+                                    <td>{{ review.review_description }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
         </div>
     </div>
     `

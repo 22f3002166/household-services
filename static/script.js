@@ -9,6 +9,7 @@ import customer from './components/customer.js';
 import professional from './components/professional.js';
 import create_service from './components/create_service.js';
 import edit_service from './components/edit_service.js';
+import review from './components/review.js';
 
 const routes = [
     {path: '/', component: Home},
@@ -21,7 +22,8 @@ const routes = [
     {path: '/customer', component: customer},
     {path: '/professional', component: professional},
     {path: '/create_service', component: create_service},
-    {path: '/edit_service/:id', component: edit_service}
+    {path: '/edit_service/:id', component: edit_service},
+    {path: '/review/:id', component: review}
 
 ]
 const router = new VueRouter({

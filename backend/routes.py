@@ -598,13 +598,15 @@ def get_service_professional_reviews():
             if service_request:
                 service = Services.query.get(service_request.service_id)
                 service_name = service.name if service else "Unknown"
+                customer_name = User.query.get(review.customer_id).name
 
             review_data.append({
                 'service_request_id': review.service_request_id,
                 'service_name': service_name if service_name else "Unknown",
                 'customer_id': review.customer_id,
                 'rating': review.rating,
-                'review_description': review.review_description
+                'review_description': review.review_description,
+                'customer_name': customer_name
             })
 
         return jsonify({'reviews': review_data}), 200
@@ -766,7 +768,10 @@ def get_services_customer():
 @roles_accepted('customer')
 def get_in_progress_requests():
     try:
-        service_requests = ServiceRequest.query.filter_by(user_id=current_user.id, service_status='in progress').all()
+        service_requests = service_requests = ServiceRequest.query.filter(
+                                                ServiceRequest.user_id == current_user.id,
+                                                ServiceRequest.service_status.in_(['in progress', 'pending'])  
+                                            ).all()
 
         result = []
         for request in service_requests:
@@ -804,4 +809,32 @@ def complete_service_cust_request(request_id):
     db.session.commit()
 
     return jsonify({'message': 'Service request completed successfully'}), 200
+
+
+@app.route('/api/customer/completed_requests', methods=['GET'])
+@auth_required('token')
+@roles_accepted('customer')
+def get_comp_requests():
+    try:
+        service_requests = ServiceRequest.query.filter_by(user_id=current_user.id, service_status='completed').all()
+
+        result = []
+        for request in service_requests:
+            provider = User.query.get(request.service_provider_id)  
+
+            result.append({
+                'id': request.id,
+                'service_id': request.service_id,
+                'service_name': Services.query.get(request.service_id).name,
+                'service_provider_email': provider.email if provider else None,
+                'service_status': request.service_status,
+                'date_of_register': request.date_of_register,
+                'date_of_completion': request.date_of_completion
+            })
+            print(result)
+        
+        return jsonify({'completed_requests': result}), 200
+
+    except Exception as e:
+        return jsonify({'message': 'Error retrieving in-progress requests', 'error': str(e)}), 500
 
