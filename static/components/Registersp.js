@@ -23,8 +23,20 @@ export default {
                     <label for="experience" class="form-label">Experience (Years)</label>
                     <input type="number" class="form-control" id="experience" v-model="formData.service_provider_experience" required>
                 </div>
+                <div class="mb-3">
+                    <label for="service" class="form-label">Select Service</label>
+                    <select class="form-control" id="service" v-model="formData.service_name" required>
+                        <option v-for="service in services" :key="service.id" :value="service.name">
+                            {{ service.name }}
+                        </option>
+                    </select>
+                </div>
                 <div class="text-center">
-                    <button class="btn btn-primary w-100" @click="registerServiceProfessional"  :disabled="!formData.email || !formData.password || !formData.name || !formData.service_provider_experience">Register</button>
+                    <button class="btn btn-primary w-100" @click="registerServiceProfessional"  
+                        :disabled="!formData.email || !formData.password || !formData.name || 
+                        !formData.service_provider_experience || !formData.service_name">
+                        Register
+                    </button>
                 </div>
             </div>
         </div>
@@ -36,26 +48,40 @@ export default {
                 name: "",
                 email: "",
                 password: "",
-                service_provider_experience: ""
+                service_provider_experience: "",
+                service_name: ""  // Now stores service name instead of ID
             },
+            services: [],
             message: "",
             successMessage: ""
         };
     },
 
+    mounted() {
+        this.getServices();
+    },
+
     methods: {
-        registerServiceProfessional() {
-            fetch('/api/register_service_professional', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": 'application/json'
-                },
-                body: JSON.stringify(this.formData)
-            })
-            .then(response => response.json())
-            .then(data => { 
-                console.log(data);
-                if (data.success) {
+        async getServices() {
+            try {
+                const response = await fetch('/api/get_unassigned_services');
+                this.services = await response.json();
+            } catch (error) {
+                console.error("Error fetching services:", error);
+                this.message = "Failed to load services.";
+            }
+        },
+
+        async registerServiceProfessional() {
+            try {
+                const response = await fetch('/api/register_service_professional', {
+                    method: 'POST',
+                    headers: { "Content-Type": 'application/json' },
+                    body: JSON.stringify(this.formData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
                     this.successMessage = "Registration successful! Redirecting to login...";
                     this.message = "";
                     setTimeout(() => this.$router.push('/login'), 2000);
@@ -63,12 +89,11 @@ export default {
                     this.message = data.message;
                     this.successMessage = "";
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error("Registration error:", error);
                 this.message = "An error occurred. Please try again.";
                 this.successMessage = "";
-            });
+            }
         }
     }
 }

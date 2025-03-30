@@ -60,7 +60,7 @@ export default {
                         this.message = "Invalid role assigned. Contact support.";
                     }
                 } else {
-                    this.message = "Invalid email or password. Please try again.";
+                    this.message = data.message
                 }
             })
             .catch(error => {

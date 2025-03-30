@@ -5,6 +5,8 @@ import Registersp from './components/Registersp.js';
 import Navbar from './components/Navbar.js';
 import Footer from './components/Footer.js';
 import admin from './components/admin.js';
+import customer from './components/customer.js';
+import professional from './components/professional.js';
 
 const routes = [
     {path: '/', component: Home},
@@ -13,7 +15,9 @@ const routes = [
     {path: '/registersp', component: Registersp},
     {path: '/navbar', component: Navbar},
     {path: '/foot', component: Footer},
-    {path: '/admin', component: admin}
+    {path: '/admin', component: admin},
+    {path: '/customer', component: customer},
+    {path: '/professional', component: professional}
 
 ]
 const router = new VueRouter({

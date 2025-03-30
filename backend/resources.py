@@ -50,7 +50,7 @@ class ServiceApi(Resource):
             service = Services(name = args["name"],
                             base_price = args["base_price"],
                             description = args["description"],
-                            user_id = current_user.id)
+                            user_id = None)
             db.session.add(service)
             try:
                 db.session.commit()
